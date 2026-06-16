@@ -6,7 +6,10 @@
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { CUTADAPT as CUTADAPT_1 } from '../modules/nf-core/cutadapt/main'
 include { UMI_TOOLS              } from '../modules/local/umi_tools/main'
-include { BOWTIE_BUILD           } from '../modules/nf-core/bowtie/build/main'
+include { CUTADAPT as CUTADAPT_2 } from '../modules/nf-core/cutadapt/main'
+include { BOWTIE2_ALIGN as BOWTIE_rRNA } from '../modules/nf-core/bowtie2/align/main'
+include { BOWTIE2_ALIGN as BOWTIE_tRNA } from '../modules/nf-core/bowtie2/align/main'
+include { BOWTIE2_ALIGN as BOWTIE_snRNA } from '../modules/nf-core/bowtie2/align/main'
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { RIBOWALTZ              } from '../modules/nf-core/ribowaltz/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
@@ -46,11 +49,35 @@ workflow RIBOSEQ {
     // First the Linker MC+ (MC+) is trimmed from the 3’ end of each read and only reads 
     // longer than X+9nt are retained, while shorter reads are discarded
     CUTADAPT_1(ch_samplesheet)
+    ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT_1.out.log.map{ _meta, file -> file })
 
+    //The sequence of the 5’ and 3’ UMIs are moved from the read sequence to the read name
     //
     // MODULE: Extract UMIs
     //
     UMI_TOOLS(CUTADAPT_1.out.reads)
+    ch_multiqc_files = ch_multiqc_files.mix(UMI_TOOLS.out.log.map{ _meta, file -> file })
+    
+    // The T preceding the RPF is then removed:
+    //
+    // MODULE: CUTADAPT_2
+    //
+    CUTADAPT_2(UMI_TOOLS.out.reads)
+    ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT_2.out.log.map{ _meta, file -> file })
+
+    //
+    // MODULE: Align to rRNA, tRNA and snRNA reference sequences
+    //
+    ch_bowtie2_rrna_index = Channel.value([[id: 'rRNA'], file(params.bowtie2_rRNA, checkIfExists: true)])
+    ch_bowtie2_trna_index = Channel.value([[id: 'tRNA'], file(params.bowtie2_tRNA, checkIfExists: true)])
+    ch_bowtie2_snrna_index = Channel.value([[id: 'snRNA'], file(params.bowtie2_snRNA, checkIfExists: true)]) 
+    
+    BOWTIE_rRNA(CUTADAPT_2.out.reads, ch_bowtie2_rrna_index, [], true, false)
+    ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_rRNA.out.log.map{ _meta, file -> file })
+    BOWTIE_tRNA(BOWTIE_rRNA.out.fastq, ch_bowtie2_trna_index, [], true, false)
+    ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_tRNA.out.log.map{ _meta, file -> file })
+    BOWTIE_snRNA(BOWTIE_tRNA.out.fastq, ch_bowtie2_snrna_index, [], true, false)
+    ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_snRNA.out.log.map{ _meta, file -> file })
 
     //
     // Collate and save software versions

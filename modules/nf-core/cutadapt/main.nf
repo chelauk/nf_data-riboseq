@@ -21,6 +21,7 @@ process CUTADAPT {
     script:
     def args = task.ext.args ?: ''
     def args2 = task.ext.args2 ?: ''
+    def args3 = task.ext.args3 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def trimmed  = meta.single_end ? "-o ${prefix}.trim.fastq.gz" : "-o ${prefix}_1.trim.fastq.gz -p ${prefix}_2.trim.fastq.gz"
     """
@@ -28,6 +29,7 @@ process CUTADAPT {
         --cores $task.cpus \\
         $args \\
         $args2 \\
+        $args3 \\
         $trimmed \\
         $reads \\
         > ${prefix}.cutadapt.log
