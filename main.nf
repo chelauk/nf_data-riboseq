@@ -28,9 +28,9 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_ribo
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
 //params.fasta = getGenomeAttribute('fasta')
-params.bowtie2_rRNA = params.bowtie2_rRNA ?: getGenomeAttribute('bowtie2_rRNA')
-params.bowtie2_tRNA = params.bowtie2_tRNA ?: getGenomeAttribute('bowtie2_tRNA')
-params.bowtie2_snRNA = params.bowtie2_snRNA ?: getGenomeAttribute('bowtie2_snRNA')
+params.bowtie2_rRNA  = getGenomeAttribute('bowtie2_rRNA')
+params.bowtie2_tRNA  = getGenomeAttribute('bowtie2_tRNA')
+params.bowtie2_snRNA = getGenomeAttribute('bowtie2_snRNA')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
