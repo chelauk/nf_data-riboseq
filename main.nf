@@ -28,9 +28,6 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_ribo
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
 //params.fasta = getGenomeAttribute('fasta')
-params.bowtie2_rRNA  = params.bowtie2_rRNA  ?: getGenomeAttribute('bowtie2_rRNA')
-params.bowtie2_tRNA  = params.bowtie2_tRNA  ?: getGenomeAttribute('bowtie2_tRNA')
-params.bowtie2_snRNA = params.bowtie2_snRNA ?: getGenomeAttribute('bowtie2_snRNA')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,6 +44,9 @@ workflow NF_DATA_RIBOSEQ {
     samplesheet // channel: samplesheet read in from --input
 
     main:
+    def bowtie2_rRNA = params.bowtie2_rRNA ?: getGenomeAttribute('bowtie2_rRNA')
+    def bowtie2_tRNA = params.bowtie2_tRNA ?: getGenomeAttribute('bowtie2_tRNA')
+    def bowtie2_snRNA = params.bowtie2_snRNA ?: getGenomeAttribute('bowtie2_snRNA')
 
     //
     // WORKFLOW: Run pipeline
@@ -57,6 +57,9 @@ workflow NF_DATA_RIBOSEQ {
         params.multiqc_logo,
         params.multiqc_methods_description,
         params.outdir,
+        bowtie2_rRNA,
+        bowtie2_tRNA,
+        bowtie2_snRNA,
     )
     emit:
     multiqc_report = RIBOSEQ.out.multiqc_report // channel: /path/to/multiqc_report.html
@@ -70,10 +73,6 @@ workflow NF_DATA_RIBOSEQ {
 workflow {
 
     main:
-    log.info "DEBUG bowtie2_rRNA=${params.bowtie2_rRNA}"
-    log.info "DEBUG bowtie2_tRNA=${params.bowtie2_tRNA}"
-    log.info "DEBUG bowtie2_snRNA=${params.bowtie2_snRNA}"
-
     //
     // SUBWORKFLOW: Run initialisation tasks
     //

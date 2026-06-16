@@ -32,6 +32,9 @@ workflow RIBOSEQ {
     multiqc_logo
     multiqc_methods_description
     outdir
+    bowtie2_rRNA
+    bowtie2_tRNA
+    bowtie2_snRNA
 
     main:
 
@@ -68,12 +71,12 @@ workflow RIBOSEQ {
     //
     // MODULE: Align to rRNA, tRNA and snRNA reference sequences
     //
-    if (!params.bowtie2_rRNA || !params.bowtie2_tRNA || !params.bowtie2_snRNA) {
+    if (!bowtie2_rRNA || !bowtie2_tRNA || !bowtie2_snRNA) {
         error "Bowtie2 riboseq indexes are required. Set --genome GRCh38 or provide --bowtie2_rRNA, --bowtie2_tRNA and --bowtie2_snRNA."
     }
-    ch_bowtie2_rrna_index = Channel.value([[id: 'rRNA'], file(params.bowtie2_rRNA, checkIfExists: true)])
-    ch_bowtie2_trna_index = Channel.value([[id: 'tRNA'], file(params.bowtie2_tRNA, checkIfExists: true)])
-    ch_bowtie2_snrna_index = Channel.value([[id: 'snRNA'], file(params.bowtie2_snRNA, checkIfExists: true)]) 
+    ch_bowtie2_rrna_index = Channel.value([[id: 'rRNA'], file(bowtie2_rRNA, checkIfExists: true)])
+    ch_bowtie2_trna_index = Channel.value([[id: 'tRNA'], file(bowtie2_tRNA, checkIfExists: true)])
+    ch_bowtie2_snrna_index = Channel.value([[id: 'snRNA'], file(bowtie2_snRNA, checkIfExists: true)]) 
     
     BOWTIE_rRNA(CUTADAPT_2.out.reads, ch_bowtie2_rrna_index, [], true, false)
     ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_rRNA.out.log.map{ _meta, file -> file })
