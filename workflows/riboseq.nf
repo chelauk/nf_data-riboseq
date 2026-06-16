@@ -77,12 +77,13 @@ workflow RIBOSEQ {
     ch_bowtie2_rrna_index = Channel.value([[id: 'rRNA'], file(bowtie2_rRNA, checkIfExists: true)])
     ch_bowtie2_trna_index = Channel.value([[id: 'tRNA'], file(bowtie2_tRNA, checkIfExists: true)])
     ch_bowtie2_snrna_index = Channel.value([[id: 'snRNA'], file(bowtie2_snRNA, checkIfExists: true)]) 
+    ch_no_fasta = Channel.value([[id: 'fasta'], []])
     
-    BOWTIE_rRNA(CUTADAPT_2.out.reads, ch_bowtie2_rrna_index, [], true, false)
+    BOWTIE_rRNA(CUTADAPT_2.out.reads, ch_bowtie2_rrna_index, ch_no_fasta, true, false)
     ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_rRNA.out.log.map{ _meta, file -> file })
-    BOWTIE_tRNA(BOWTIE_rRNA.out.fastq, ch_bowtie2_trna_index, [], true, false)
+    BOWTIE_tRNA(BOWTIE_rRNA.out.fastq, ch_bowtie2_trna_index, ch_no_fasta, true, false)
     ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_tRNA.out.log.map{ _meta, file -> file })
-    BOWTIE_snRNA(BOWTIE_tRNA.out.fastq, ch_bowtie2_snrna_index, [], true, false)
+    BOWTIE_snRNA(BOWTIE_tRNA.out.fastq, ch_bowtie2_snrna_index, ch_no_fasta, true, false)
     ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_snRNA.out.log.map{ _meta, file -> file })
 
     //
