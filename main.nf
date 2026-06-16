@@ -32,10 +32,6 @@ params.bowtie2_rRNA  = params.bowtie2_rRNA  ?: getGenomeAttribute('bowtie2_rRNA'
 params.bowtie2_tRNA  = params.bowtie2_tRNA  ?: getGenomeAttribute('bowtie2_tRNA')
 params.bowtie2_snRNA = params.bowtie2_snRNA ?: getGenomeAttribute('bowtie2_snRNA')
 
-log.info "DEBUG bowtie2_rRNA=${params.bowtie2_rRNA}"
-log.info "DEBUG bowtie2_tRNA=${params.bowtie2_tRNA}"
-log.info "DEBUG bowtie2_snRNA=${params.bowtie2_snRNA}"
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     NAMED WORKFLOWS FOR PIPELINE
@@ -74,6 +70,10 @@ workflow NF_DATA_RIBOSEQ {
 workflow {
 
     main:
+    log.info "DEBUG bowtie2_rRNA=${params.bowtie2_rRNA}"
+    log.info "DEBUG bowtie2_tRNA=${params.bowtie2_tRNA}"
+    log.info "DEBUG bowtie2_snRNA=${params.bowtie2_snRNA}"
+
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
