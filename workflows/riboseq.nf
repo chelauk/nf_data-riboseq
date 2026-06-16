@@ -86,6 +86,16 @@ workflow RIBOSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(BOWTIE_snRNA.out.log.map{ _meta, file -> file })
 
     //
+    // MODULE: Align to genome
+    //
+    ch_star_index = Channel.value([[id: 'GRCh38'], file('/processing_data/reference_datasets/iGenomes/2026.1/Homo_sapiens/NCBI/GRCh38/Sequence/STARIndex/', checkIfExists: true)])
+    ch_star_gtf = Channel.value([[id: 'GRCh38'], file('/processing_data/reference_datasets/iGenomes/2026.1/Homo_sapiens/NCBI/GRCh38/Sequence/STARIndex/genes.gtf', checkIfExists: true)])
+    STAR_ALIGN(BOWTIE_snRNA.out.fastq, ch_star_index, ch_star_gtf, false)
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_final.map{ _meta, file -> file })
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_out.map{ _meta, file -> file })
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_progress.map{ _meta, file -> file })
+
+    //
     // Collate and save software versions
     //
     def topic_versions = channel.topic("versions")
