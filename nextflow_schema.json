@@ -78,6 +78,24 @@
                     "fa_icon": "fas fa-ban",
                     "hidden": true,
                     "default": "s3://ngi-igenomes/igenomes/"
+                },
+                "bowtie2_rRNA": {
+                    "type": "string",
+                    "description": "Path to the Bowtie2 rRNA index directory.",
+                    "fa_icon": "fas fa-folder-open",
+                    "hidden": true
+                },
+                "bowtie2_tRNA": {
+                    "type": "string",
+                    "description": "Path to the Bowtie2 tRNA index directory.",
+                    "fa_icon": "fas fa-folder-open",
+                    "hidden": true
+                },
+                "bowtie2_snRNA": {
+                    "type": "string",
+                    "description": "Path to the Bowtie2 snRNA index directory.",
+                    "fa_icon": "fas fa-folder-open",
+                    "hidden": true
                 }
             }
         },
