@@ -4,8 +4,8 @@ process UMI_TOOLS {
 
     conda "${moduleDir}/environment.yml"
     container "${workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/umi_tools:1.1.6--py310h2b6aa90_4' :
-        'quay.io/biocontainers/umi_tools:1.1.6--py310h2b6aa90_4'}"
+        'https://depot.galaxyproject.org/singularity/umi_tools:1.1.6--py312h0fa9677_0' :
+        'quay.io/biocontainers/umi_tools:1.1.6--py312h0fa9677_0'}"
 
     input:
     tuple val(meta), path(reads)
