@@ -27,7 +27,10 @@ include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_ribo
 // TODO nf-core: Remove this line if you don't need a FASTA file
 //   This is an example of how to use getGenomeAttribute() to fetch parameters
 //   from igenomes.config using `--genome`
-params.fasta = getGenomeAttribute('fasta')
+//params.fasta = getGenomeAttribute('fasta')
+params.bowtie2_rRNA = getGenomeAttribute('bowtie2_rRNA')
+params.bowtie2_tRNA = getGenomeAttribute('bowtie2_tRNA')
+params.bowtie2_snRNA = getGenomeAttribute('bowtie2_snRNA')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
