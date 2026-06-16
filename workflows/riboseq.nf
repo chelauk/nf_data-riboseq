@@ -68,6 +68,9 @@ workflow RIBOSEQ {
     //
     // MODULE: Align to rRNA, tRNA and snRNA reference sequences
     //
+    if (!params.bowtie2_rRNA || !params.bowtie2_tRNA || !params.bowtie2_snRNA) {
+        error "Bowtie2 riboseq indexes are required. Set --genome GRCh38 or provide --bowtie2_rRNA, --bowtie2_tRNA and --bowtie2_snRNA."
+    }
     ch_bowtie2_rrna_index = Channel.value([[id: 'rRNA'], file(params.bowtie2_rRNA, checkIfExists: true)])
     ch_bowtie2_trna_index = Channel.value([[id: 'tRNA'], file(params.bowtie2_tRNA, checkIfExists: true)])
     ch_bowtie2_snrna_index = Channel.value([[id: 'snRNA'], file(params.bowtie2_snRNA, checkIfExists: true)]) 
