@@ -29,7 +29,7 @@ lint:
 template:
   org: nf_data
   name: riboseq
-  description: 'immaginabiotech '
+  description: "immaginabiotech "
   author: Chela James
   version: 1.0.0dev
   force: true
