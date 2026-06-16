@@ -5,6 +5,7 @@
 */
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { CUTADAPT as CUTADAPT_1 } from '../modules/nf-core/cutadapt/main'
+include { UMI_TOOLS              } from '../modules/local/umi_tools/main'
 include { BOWTIE_BUILD           } from '../modules/nf-core/bowtie/build/main'
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { RIBOWALTZ              } from '../modules/nf-core/ribowaltz/main'
@@ -45,6 +46,11 @@ workflow RIBOSEQ {
     // First the Linker MC+ (MC+) is trimmed from the 3’ end of each read and only reads 
     // longer than X+9nt are retained, while shorter reads are discarded
     CUTADAPT_1(ch_samplesheet)
+
+    //
+    // MODULE: Extract UMIs
+    //
+    UMI_TOOLS(CUTADAPT_1.out.reads)
 
     //
     // Collate and save software versions
