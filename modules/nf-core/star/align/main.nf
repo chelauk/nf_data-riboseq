@@ -54,6 +54,7 @@ process STAR_ALIGN {
         --readFilesIn ${reads1.join(",")} ${reads2.join(",")} \\
         --runThreadN $task.cpus \\
         --outFileNamePrefix $prefix. \\
+        --quantMode TranscriptomeSAM GeneCounts \\
         $out_sam_type \\
         $ignore_gtf \\
         $attrRG \\
