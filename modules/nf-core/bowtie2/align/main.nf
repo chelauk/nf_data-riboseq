@@ -21,7 +21,7 @@ process BOWTIE2_ALIGN {
     tuple val(meta), path("*.csi")      , emit: csi     , optional:true
     tuple val(meta), path("*.crai")     , emit: crai    , optional:true
     tuple val(meta), path("*.log")      , emit: log
-    tuple val(meta), path("*fastq.gz")  , emit: fastq   , optional:true
+    tuple val(meta), path("*.unmapped*.fastq.gz"), emit: fastq, optional:true
     tuple val("${task.process}"), val('bowtie2'), eval("bowtie2 --version 2>&1 | sed -n 's/.*bowtie2-align-s version //p'"), emit: versions_bowtie2, topic: versions
     tuple val("${task.process}"), val('samtools'), eval("samtools version | sed '1!d;s/.* //'"), emit: versions_samtools, topic: versions
     tuple val("${task.process}"), val('pigz'), eval("pigz --version 2>&1 | sed 's/pigz //'"), emit: versions_pigz, topic: versions
@@ -33,15 +33,16 @@ process BOWTIE2_ALIGN {
     def args = task.ext.args ?: ""
     def args2 = task.ext.args2 ?: ""
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def filter_only = task.ext.filter_only ?: false
     def rg = args.contains("--rg-id") ? "" : "--rg-id ${prefix} --rg SM:${prefix}"
 
     def unaligned = ""
     def reads_args = ""
     if (meta.single_end) {
-        unaligned = save_unaligned ? "--un-gz ${prefix}.unmapped.fastq.gz" : ""
+        unaligned = save_unaligned ? "--un-gz=${prefix}.unmapped.fastq.gz" : ""
         reads_args = "-U ${reads}"
     } else {
-        unaligned = save_unaligned ? "--un-conc-gz ${prefix}.unmapped.fastq.gz" : ""
+        unaligned = save_unaligned ? "--un-conc-gz=${prefix}.unmapped.fastq.gz" : ""
         reads_args = "-1 ${reads[0]} -2 ${reads[1]}"
     }
 
@@ -51,6 +52,9 @@ process BOWTIE2_ALIGN {
     def extension = extension_matcher.getCount() > 0 ? extension_matcher[0][2].toLowerCase() : "bam"
     def reference = fasta && extension=="cram"  ? "--reference ${fasta}" : ""
     if (!fasta && extension=="cram") error "Fasta reference is required for CRAM output"
+    def alignment_output = filter_only
+        ? "-S /dev/null \\\n        2>| >(tee ${prefix}.bowtie2.log >&2)"
+        : "2>| >(tee ${prefix}.bowtie2.log >&2) \\\n        | samtools ${samtools_command} ${args2} --threads ${task.cpus} ${reference} -o ${prefix}.${extension} -"
 
     """
     INDEX=`find -L ./ -name "*.rev.1.bt2" | sed "s/\\.rev.1.bt2\$//"`
@@ -58,14 +62,13 @@ process BOWTIE2_ALIGN {
     [ -z "\$INDEX" ] && echo "Bowtie2 index files not found" 1>&2 && exit 1
 
     bowtie2 \\
-        -x \$INDEX \\
-        $reads_args \\
         --threads $task.cpus \\
-        $unaligned \\
-        $rg \\
         $args \\
-        2>| >(tee ${prefix}.bowtie2.log >&2) \\
-        | samtools $samtools_command $args2 --threads $task.cpus ${reference} -o ${prefix}.${extension} -
+        $reads_args \\
+        $unaligned \\
+        -x \$INDEX \\
+        $rg \\
+        $alignment_output
 
     if [ -f ${prefix}.unmapped.fastq.1.gz ]; then
         mv ${prefix}.unmapped.fastq.1.gz ${prefix}.unmapped_1.fastq.gz
