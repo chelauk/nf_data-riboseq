@@ -21,12 +21,13 @@ process BOWTIE2_ALIGN {
 
     script:
     def args = task.ext.args ?: ""
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}.${meta2.id}"
 
     """
     INDEX=`find -L ./ -name "*.rev.1.bt2" | sed "s/\\.rev.1.bt2\$//"`
     [ -z "\$INDEX" ] && INDEX=`find -L ./ -name "*.rev.1.bt2l" | sed "s/\\.rev.1.bt2l\$//"`
     [ -z "\$INDEX" ] && echo "Bowtie2 index files not found" 1>&2 && exit 1
+    [ "$(basename "$reads")" = "${prefix}.unmapped.fastq.gz" ] && echo "Bowtie2 input and output FASTQ paths are identical" 1>&2 && exit 1
 
     bowtie2 \\
         --threads $task.cpus \\
@@ -39,7 +40,7 @@ process BOWTIE2_ALIGN {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
+    def prefix = task.ext.prefix ?: "${meta.id}.${meta2.id}"
 
     """
     touch ${prefix}.bowtie2.log
