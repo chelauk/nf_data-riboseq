@@ -13,7 +13,7 @@ process UMI_TOOLS {
     output:
     tuple val(meta), path('*.umi.fastq.gz'), emit: reads
     tuple val(meta), path('*.log')          , emit: log
-    tuple val("${task.process}"), val("umi_tools"), eval('umi_tools --version'), topic: versions, emit: versions_umi_tools
+    tuple val("${task.process}"), val("umi_tools"), eval("umi_tools --version 2>&1 | sed 's/.*version: //'"), topic: versions, emit: versions_umi_tools
 
     when:
     task.ext.when == null || task.ext.when
