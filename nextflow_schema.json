@@ -98,10 +98,11 @@
                     "hidden": true
                 },
                 "bowtie2_read_limit": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "Limit Bowtie2 depletion steps to the first N reads for quick debugging.",
                     "fa_icon": "fas fa-vial",
-                    "hidden": true
+                    "hidden": true,
+                    "pattern": "^[0-9]+$"
                 }
             }
         },
