@@ -22,6 +22,7 @@ process BOWTIE2_ALIGN {
     script:
     def args = task.ext.args ?: ""
     def prefix = task.ext.prefix ?: "${meta.id}.${meta2.id}"
+    def cpus = task.cpus ?: 1
 
     """
     INDEX=`find -L ./ -name "*.rev.1.bt2" | sed "s/\\.rev.1.bt2\$//"`
@@ -30,7 +31,7 @@ process BOWTIE2_ALIGN {
     [ "$(basename "${reads}")" = "${prefix}.unmapped.fastq.gz" ] && echo "Bowtie2 input and output FASTQ paths are identical" 1>&2 && exit 1
 
     bowtie2 \\
-        --threads ${task.cpus} \\
+        --threads=${cpus} \\
         $args \\
         -U ${reads} \\
         --un-gz=${prefix}.unmapped.fastq.gz \\
