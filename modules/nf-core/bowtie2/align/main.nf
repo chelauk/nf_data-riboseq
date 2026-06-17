@@ -33,7 +33,7 @@ process BOWTIE2_ALIGN {
         --threads $task.cpus \\
         ${args} \\
         -U $reads \\
-        -x $INDEX \\
+        -x \$INDEX \\
         --un-gz ${prefix}.unmapped.fastq.gz \\
         -S /dev/null \\
         2>| >(tee ${prefix}.bowtie2.log >&2)
