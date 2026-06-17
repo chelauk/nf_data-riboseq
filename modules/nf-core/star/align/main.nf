@@ -2,10 +2,10 @@ process STAR_ALIGN {
     tag "$meta.id"
     label 'process_high'
 
-    conda "${moduleDir}/environment.yml
+    conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container
     ? 'https://depot.galaxyproject.org/singularity/star%3A2.7.4a--0'
-    : 'quay.io/biocontainers/star:2.7.4a--0' }"
+    : 'quay.io/biocontainers/star:2.7.4a--0' }"    
 
     input:
     tuple val(meta), path(reads, stageAs: "input*/*")
