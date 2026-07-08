@@ -3,14 +3,15 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { CUTADAPT as CUTADAPT_1 } from '../modules/nf-core/cutadapt/main'
-include { UMI_TOOLS              } from '../modules/local/umi_tools/main'
-include { CUTADAPT as CUTADAPT_2 } from '../modules/nf-core/cutadapt/main'
-include { BOWTIE2_ALIGN as BOWTIE_rRNA } from '../modules/nf-core/bowtie2/align/main'
-include { BOWTIE2_ALIGN as BOWTIE_tRNA } from '../modules/nf-core/bowtie2/align/main'
+include { FASTQC                        } from '../modules/nf-core/fastqc/main'
+include { CUTADAPT as CUTADAPT_1        } from '../modules/nf-core/cutadapt/main'
+include { UMI_EXTRACT                   } from '../modules/local/umi_tools/main'
+include { CUTADAPT as CUTADAPT_2        } from '../modules/nf-core/cutadapt/main'
+include { BOWTIE2_ALIGN as BOWTIE_rRNA  } from '../modules/nf-core/bowtie2/align/main'
+include { BOWTIE2_ALIGN as BOWTIE_tRNA  } from '../modules/nf-core/bowtie2/align/main'
 include { BOWTIE2_ALIGN as BOWTIE_snRNA } from '../modules/nf-core/bowtie2/align/main'
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
+include { UMI_DEDUP              } from '../modules/local/umi_tools_dedup/main'
 include { RIBOWALTZ              } from '../modules/nf-core/ribowaltz/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
@@ -58,14 +59,14 @@ workflow RIBOSEQ {
     //
     // MODULE: Extract UMIs
     //
-    UMI_TOOLS(CUTADAPT_1.out.reads)
-    ch_multiqc_files = ch_multiqc_files.mix(UMI_TOOLS.out.log.map{ _meta, file -> file })
+    UMI_EXTRACT(CUTADAPT_1.out.reads)
+    ch_multiqc_files = ch_multiqc_files.mix(UMI_EXTRACT.out.log.map{ _meta, file -> file })
     
     // The T preceding the RPF is then removed:
     //
     // MODULE: CUTADAPT_2
     //
-    CUTADAPT_2(UMI_TOOLS.out.reads)
+    CUTADAPT_2(UMI_EXTRACT.out.reads)
     ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT_2.out.log.map{ _meta, file -> file })
 
     //
@@ -94,6 +95,13 @@ workflow RIBOSEQ {
     ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_final.map{ _meta, file -> file })
     ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_out.map{ _meta, file -> file })
     ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN.out.log_progress.map{ _meta, file -> file })
+
+    //
+    // MODULE: Deduplicate aligned reads
+    //
+    UMI_DEDUP(STAR_ALIGN.out.bam_sorted_aligned)
+    ch_multiqc_files = ch_multiqc_files.mix(UMI_DEDUP.out.log.map{ _meta, file -> file })
+    ch_multiqc_files = ch_multiqc_files.mix(UMI_DEDUP.out.stats.map{ _meta, file -> file })
 
     //
     // Collate and save software versions
