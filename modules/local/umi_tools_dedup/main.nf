@@ -8,7 +8,7 @@ process UMI_DEDUP {
         'quay.io/biocontainers/umi_tools:1.1.6--py312h0fa9677_0'}"
 
     input:
-    tuple val(meta), path(bam)
+    tuple val(meta), path(bam), path(bai)
 
     output:
     tuple val(meta), path('*.dedup.bam')            , emit: bam

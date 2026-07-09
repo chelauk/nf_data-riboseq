@@ -11,6 +11,7 @@ include { BOWTIE2_ALIGN as BOWTIE_rRNA  } from '../modules/nf-core/bowtie2/align
 include { BOWTIE2_ALIGN as BOWTIE_tRNA  } from '../modules/nf-core/bowtie2/align/main'
 include { BOWTIE2_ALIGN as BOWTIE_snRNA } from '../modules/nf-core/bowtie2/align/main'
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
+include { SAMTOOLS_INDEX         } from '../modules/nf-core/samtools/index/main'
 include { UMI_DEDUP              } from '../modules/local/umi_tools_dedup/main'
 include { RIBOWALTZ              } from '../modules/nf-core/ribowaltz/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
@@ -99,7 +100,8 @@ workflow RIBOSEQ {
     //
     // MODULE: Deduplicate aligned reads
     //
-    UMI_DEDUP(STAR_ALIGN.out.bam_sorted_aligned)
+    SAMTOOLS_INDEX(STAR_ALIGN.out.bam)
+    UMI_DEDUP(SAMTOOLS_INDEX.out.bam_bai)
     ch_multiqc_files = ch_multiqc_files.mix(UMI_DEDUP.out.log.map{ _meta, file -> file })
     ch_multiqc_files = ch_multiqc_files.mix(UMI_DEDUP.out.stats.map{ _meta, file -> file })
 
