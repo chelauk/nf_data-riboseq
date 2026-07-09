@@ -1,0 +1,6 @@
+name: umi_tools_dedup
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconda::umi_tools=1.1.6

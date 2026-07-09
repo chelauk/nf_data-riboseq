@@ -1,4 +1,4 @@
-process UMI_EXTRACT {
+process UMI_DEDUP {
     tag "$meta.id"
     label 'process_medium'
 
@@ -8,11 +8,12 @@ process UMI_EXTRACT {
         'quay.io/biocontainers/umi_tools:1.1.6--py312h0fa9677_0'}"
 
     input:
-    tuple val(meta), path(reads)
+    tuple val(meta), path(bam)
 
     output:
-    tuple val(meta), path('*.umi.fastq.gz'), emit: reads
-    tuple val(meta), path('*.log')          , emit: log
+    tuple val(meta), path('*.dedup.bam')            , emit: bam
+    tuple val(meta), path('*.umi_tools_dedup.log')  , emit: log
+    tuple val(meta), path('*.umi_tools_dedup*.tsv') , optional: true, emit: stats
     tuple val("${task.process}"), val("umi_tools"), eval("umi_tools --version 2>&1 | sed 's/.*version: //'"), topic: versions, emit: versions_umi_tools
 
     when:
@@ -20,21 +21,23 @@ process UMI_EXTRACT {
 
     script:
     def args = task.ext.args ?: ''
-    def args2 = task.ext.args2 ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    umi_tools extract \\
+    umi_tools dedup \\
         $args \\
-        $args2 \\
-        -I $reads \\
-        -S ${prefix}.umi.fastq.gz \\
-        --log=${prefix}.umi_tools.log
+        -I $bam \\
+        -S ${prefix}.dedup.bam \\
+        --log=${prefix}.umi_tools_dedup.log \\
+        --output-stats=${prefix}.umi_tools_dedup
     """
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    echo '' | gzip > ${prefix}.umi.fastq.gz
-    touch ${prefix}.umi_tools.log
+    touch ${prefix}.dedup.bam
+    touch ${prefix}.umi_tools_dedup.log
+    touch ${prefix}.umi_tools_dedup_edit_distance.tsv
+    touch ${prefix}.umi_tools_dedup_per_umi.tsv
+    touch ${prefix}.umi_tools_dedup_per_umi_per_position.tsv
     """
 }
